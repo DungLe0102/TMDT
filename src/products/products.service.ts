@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Product } from './product.entity.js';
@@ -18,7 +18,7 @@ export class ProductsService {
         const { categoryId, ...rest } = createProductDto;
         const category = await this.categoriesRepository.findOne({ where: { id: categoryId } });
         if (!category) {
-            throw new NotFoundException('Category not found');
+            throw new NotFoundException(`Không tìm thấy danh mục với ID ${categoryId}`);
         }
         const product = this.productsRepository.create({ ...rest, category });
         return this.productsRepository.save(product);
@@ -31,7 +31,7 @@ export class ProductsService {
     async findProductById(id: number): Promise<Product> {
         const product = await this.productsRepository.findOne({ where: { id }, relations: { category: true } });
         if (!product) {
-            throw new NotFoundException('Product not found');
+            throw new NotFoundException(`Không tìm thấy sản phẩm với ID ${id}`);
         }
         return product;
     }
@@ -42,7 +42,7 @@ export class ProductsService {
         if (categoryId) {
             const category = await this.categoriesRepository.findOne({ where: { id: categoryId } });
             if (!category) {
-                throw new NotFoundException('Category not found');
+                throw new NotFoundException(`Không tìm thấy danh mục với ID ${categoryId}`);
             }
             product.category = category;
         }
@@ -52,7 +52,14 @@ export class ProductsService {
 
     async removeProduct(id: number): Promise<void> {
         const product = await this.findProductById(id);
-        await this.productsRepository.remove(product);
+        try {
+            await this.productsRepository.remove(product);
+        } catch (error: any) {
+            if (error.code === '23503') {
+                throw new BadRequestException('Không thể xóa sản phẩm đã có trong đơn hàng.');
+            }
+            throw error;
+        }
     }
 
     async createCategory(createCategoryDto: CreateCategoryDto): Promise<Category> {
@@ -67,7 +74,7 @@ export class ProductsService {
     async findCategoryById(id: number): Promise<Category> {
         const category = await this.categoriesRepository.findOne({ where: { id }, relations: { products: true } });
         if (!category) {
-            throw new NotFoundException('Category not found');
+            throw new NotFoundException(`Không tìm thấy danh mục với ID ${id}`);
         }
         return category;
     }
@@ -80,6 +87,13 @@ export class ProductsService {
 
     async removeCategory(id: number): Promise<void> {
         const category = await this.findCategoryById(id);
-        await this.categoriesRepository.remove(category);
+        try {
+            await this.categoriesRepository.remove(category);
+        } catch (error: any) {
+            if (error.code === '23503') {
+                throw new BadRequestException('Không thể xóa danh mục này vì đang có sản phẩm thuộc về nó.');
+            }
+            throw error;
+        }
     }
 }

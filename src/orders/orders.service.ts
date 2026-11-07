@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Order, OrderItem } from './order.entity.js';
@@ -22,7 +22,7 @@ export class OrdersService {
 
         const user = await this.usersService.findOneById(userId);
         if (!user) {
-            throw new NotFoundException('User not found');
+            throw new NotFoundException(`Không tìm thấy người dùng với ID ${userId}`);
         }
 
         const orderItems: OrderItem[] = [];
@@ -31,8 +31,19 @@ export class OrdersService {
         for (const item of items) {
             const product = await this.productsService.findProductById(item.productId);
             if (!product) {
-                throw new NotFoundException(`Product with ID ${item.productId} not found`);
+                throw new NotFoundException(`Không tìm thấy sản phẩm với ID ${item.productId}`);
             }
+
+            if (product.quantity < item.quantity) {
+                throw new BadRequestException(
+                    `Sản phẩm "${product.name}" chỉ còn ${product.quantity} sản phẩm trong kho (bạn đặt ${item.quantity}).`,
+                );
+            }
+
+            // Trừ số lượng tồn kho
+            product.quantity -= item.quantity;
+            await this.productsService.updateProduct(product.id, { quantity: product.quantity });
+
             const orderItem = this.orderItemsRepository.create({
                 product,
                 quantity: item.quantity,
@@ -74,7 +85,7 @@ export class OrdersService {
             },
         });
         if (!order) {
-            throw new NotFoundException('Order not found');
+            throw new NotFoundException(`Không tìm thấy đơn hàng với ID ${id}`);
         }
         return order;
     }

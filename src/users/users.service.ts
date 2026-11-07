@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './user.entity.js';
@@ -14,6 +14,12 @@ export class UsersService {
 
     async create(createUserDto: CreateUserDto): Promise<User> {
         const { email, password, role } = createUserDto;
+
+        const existing = await this.findOneByEmail(email);
+        if (existing) {
+            throw new ConflictException('Email này đã được sử dụng.');
+        }
+
         const hashedPassword = await bcrypt.hash(password, 10);
         const user = this.usersRepository.create({ email, password: hashedPassword, role });
         return this.usersRepository.save(user);

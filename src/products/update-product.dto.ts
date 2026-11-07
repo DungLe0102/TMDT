@@ -1,5 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsNumber, IsOptional, IsString, Min } from 'class-validator';
 
 export class UpdateProductDto {
     @ApiPropertyOptional({
@@ -7,7 +7,7 @@ export class UpdateProductDto {
         description: 'Tên sản phẩm',
     })
     @IsOptional()
-    @IsString()
+    @IsString({ message: 'Tên sản phẩm phải là chuỗi ký tự' })
     name?: string;
 
     @ApiPropertyOptional({
@@ -15,7 +15,7 @@ export class UpdateProductDto {
         description: 'Mô tả chi tiết',
     })
     @IsOptional()
-    @IsString()
+    @IsString({ message: 'Mô tả phải là chuỗi ký tự' })
     description?: string;
 
     @ApiPropertyOptional({
@@ -23,7 +23,8 @@ export class UpdateProductDto {
         description: 'Giá sản phẩm',
     })
     @IsOptional()
-    @IsNumber()
+    @IsNumber({}, { message: 'Giá sản phẩm phải là số' })
+    @Min(0, { message: 'Giá sản phẩm không được nhỏ hơn 0' })
     price?: number;
 
     @ApiPropertyOptional({
@@ -31,7 +32,7 @@ export class UpdateProductDto {
         description: 'Mã SKU',
     })
     @IsOptional()
-    @IsString()
+    @IsString({ message: 'Mã SKU phải là chuỗi ký tự' })
     sku?: string;
 
     @ApiPropertyOptional({
@@ -39,7 +40,8 @@ export class UpdateProductDto {
         description: 'Số lượng tồn kho',
     })
     @IsOptional()
-    @IsNumber()
+    @IsNumber({}, { message: 'Số lượng phải là số' })
+    @Min(0, { message: 'Số lượng không được nhỏ hơn 0' })
     quantity?: number;
 
     @ApiPropertyOptional({
@@ -47,6 +49,7 @@ export class UpdateProductDto {
         description: 'ID danh mục',
     })
     @IsOptional()
-    @IsNumber()
+    @IsNumber({}, { message: 'ID danh mục phải là số' })
+    @Min(1, { message: 'ID danh mục không hợp lệ' })
     categoryId?: number;
 }

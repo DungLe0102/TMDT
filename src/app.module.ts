@@ -21,7 +21,7 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
         type: 'postgres',
         url: configService.getOrThrow<string>('DATABASE_URL'),
         autoLoadEntities: true,
-        synchronize: false,
+        synchronize: true,
       }),
     }),
     // Distributed tracing, auto-correlated logs, request/job metrics, error
@@ -40,3 +40,4 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
   providers: [AppService],
 })
 export class AppModule {}
+
