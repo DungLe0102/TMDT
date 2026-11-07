@@ -23,6 +23,10 @@ export class UsersService {
         return this.usersRepository.findOne({ where: { email } });
     }
 
+    async findOneById(id: number): Promise<User | null> {
+        return this.usersRepository.findOne({ where: { id } });
+    }
+
     async update(id: number, updateUserDto: UpdateUserDto): Promise<void> {
         const { password, profile } = updateUserDto;
         const hashedPassword = password ? await bcrypt.hash(password, 10) : undefined;

@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import type { Order } from '../orders/order.entity.js';
 
 @Entity()
 export class User {
@@ -16,4 +17,7 @@ export class User {
 
     @Column({ default: '' })
     profile: string;
+
+    @OneToMany('Order', (order: Order) => order.user)
+    orders: Order[];
 }
