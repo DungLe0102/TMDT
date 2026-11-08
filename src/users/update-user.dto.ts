@@ -8,8 +8,8 @@ export class UpdateUserDto {
         minLength: 6,
     })
     @IsOptional()
-    @IsString()
-    @MinLength(6)
+    @IsString({ message: 'Mật khẩu phải là chuỗi ký tự' })
+    @MinLength(6, { message: 'Mật khẩu phải có ít nhất 6 ký tự' })
     password?: string;
 
     @ApiPropertyOptional({
@@ -17,6 +17,6 @@ export class UpdateUserDto {
         description: 'Thông tin cá nhân / giới thiệu',
     })
     @IsOptional()
-    @IsString()
+    @IsString({ message: 'Thông tin giới thiệu phải là chuỗi ký tự' })
     profile?: string;
 }

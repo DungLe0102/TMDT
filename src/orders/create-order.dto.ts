@@ -1,14 +1,15 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsNotEmpty, IsNumber, IsArray, ArrayNotEmpty, ValidateNested, Min } from 'class-validator';
+import { IsNotEmpty, IsInt, IsArray, ArrayNotEmpty, ValidateNested, Min, IsOptional } from 'class-validator';
 
 export class OrderItemDto {
     @ApiProperty({
         example: 1,
         description: 'ID của sản phẩm',
     })
-    @IsNotEmpty()
-    @IsNumber()
+    @IsNotEmpty({ message: 'ID sản phẩm không được để trống' })
+    @IsInt({ message: 'ID sản phẩm phải là số nguyên' })
+    @Min(1, { message: 'ID sản phẩm không hợp lệ' })
     productId: number;
 
     @ApiProperty({
@@ -16,28 +17,29 @@ export class OrderItemDto {
         description: 'Số lượng mua (tối thiểu 1)',
         minimum: 1,
     })
-    @IsNotEmpty()
-    @IsNumber()
-    @Min(1)
+    @IsNotEmpty({ message: 'Số lượng không được để trống' })
+    @IsInt({ message: 'Số lượng phải là số nguyên' })
+    @Min(1, { message: 'Số lượng mua tối thiểu là 1' })
     quantity: number;
 }
 
 export class CreateOrderDto {
-    @ApiProperty({
+    @ApiPropertyOptional({
         example: 1,
-        description: 'ID người dùng đặt đơn',
+        description: 'ID người dùng đặt đơn (mặc định lấy theo tài khoản đang đăng nhập; Admin có thể chỉ định)',
     })
-    @IsNotEmpty()
-    @IsNumber()
-    userId: number;
+    @IsOptional()
+    @IsInt({ message: 'User ID phải là số nguyên' })
+    @Min(1, { message: 'User ID không hợp lệ' })
+    userId?: number;
 
     @ApiProperty({
         type: [OrderItemDto],
         description: 'Danh sách các mặt hàng trong đơn hàng',
     })
-    @IsNotEmpty()
-    @IsArray()
-    @ArrayNotEmpty()
+    @IsNotEmpty({ message: 'Danh sách sản phẩm không được để trống' })
+    @IsArray({ message: 'Danh sách sản phẩm phải là một mảng' })
+    @ArrayNotEmpty({ message: 'Đơn hàng phải có ít nhất 1 sản phẩm' })
     @ValidateNested({ each: true })
     @Type(() => OrderItemDto)
     items: OrderItemDto[];

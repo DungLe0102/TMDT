@@ -1,5 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsNumber, IsOptional, IsString, Min } from 'class-validator';
+import { IsNumber, IsInt, IsOptional, IsString, Min } from 'class-validator';
 
 export class UpdateProductDto {
     @ApiPropertyOptional({
@@ -40,7 +40,7 @@ export class UpdateProductDto {
         description: 'Số lượng tồn kho',
     })
     @IsOptional()
-    @IsNumber({}, { message: 'Số lượng phải là số' })
+    @IsInt({ message: 'Số lượng phải là số nguyên' })
     @Min(0, { message: 'Số lượng không được nhỏ hơn 0' })
     quantity?: number;
 
@@ -49,7 +49,7 @@ export class UpdateProductDto {
         description: 'ID danh mục',
     })
     @IsOptional()
-    @IsNumber({}, { message: 'ID danh mục phải là số' })
+    @IsInt({ message: 'ID danh mục phải là số nguyên' })
     @Min(1, { message: 'ID danh mục không hợp lệ' })
     categoryId?: number;
 }

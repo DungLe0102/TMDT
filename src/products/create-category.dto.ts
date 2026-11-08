@@ -6,7 +6,7 @@ export class CreateCategoryDto {
         example: 'Điện tử',
         description: 'Tên danh mục',
     })
-    @IsNotEmpty()
-    @IsString()
+    @IsNotEmpty({ message: 'Tên danh mục không được để trống' })
+    @IsString({ message: 'Tên danh mục phải là chuỗi ký tự' })
     name: string;
 }

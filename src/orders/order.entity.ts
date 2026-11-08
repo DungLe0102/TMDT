@@ -11,10 +11,22 @@ export class Order {
     user: User;
 
     @Column({ default: 'placed' })
-    status: string; // 'placed', 'shipped', 'delivered', 'cancelled', 'returned'
+    status: string; // 'placed', 'paid', 'shipped', 'delivered', 'cancelled', 'returned'
 
     @Column('decimal')
     total: number;
+
+    @Column({ nullable: true })
+    paymentMethod: string; // 'VIETQR', 'COD', etc.
+
+    @Column({ nullable: true })
+    qrCodeUrl: string;
+
+    @Column({ nullable: true })
+    paymentTransactionId: string;
+
+    @Column({ type: 'timestamp', nullable: true })
+    paidAt: Date;
 
     @CreateDateColumn()
     createdAt: Date;

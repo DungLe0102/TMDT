@@ -20,6 +20,10 @@ export class OrdersService {
     async createOrder(createOrderDto: CreateOrderDto): Promise<Order> {
         const { userId, items } = createOrderDto;
 
+        if (!userId) {
+            throw new BadRequestException('User ID không hợp lệ hoặc không tìm thấy thông tin đăng nhập.');
+        }
+
         const user = await this.usersService.findOneById(userId);
         if (!user) {
             throw new NotFoundException(`Không tìm thấy người dùng với ID ${userId}`);

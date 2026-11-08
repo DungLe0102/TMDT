@@ -1,5 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class UpdateCategoryDto {
     @ApiPropertyOptional({
@@ -7,6 +7,7 @@ export class UpdateCategoryDto {
         description: 'Tên danh mục mới',
     })
     @IsOptional()
-    @IsString()
+    @IsString({ message: 'Tên danh mục phải là chuỗi ký tự' })
+    @IsNotEmpty({ message: 'Tên danh mục không được để rỗng nếu được truyền' })
     name?: string;
 }

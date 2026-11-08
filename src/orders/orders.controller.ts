@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Patch, Delete, ParseIntPipe, UseGuards, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Patch, Delete, ParseIntPipe, UseGuards, Req, ForbiddenException } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBearerAuth } from '@nestjs/swagger';
 import { OrdersService } from './orders.service.js';
 import { CreateOrderDto, UpdateOrderStatusDto } from './dto/index.js';
@@ -22,8 +22,12 @@ export class OrdersController {
     @ApiBearerAuth()
     @ApiOperation({ summary: '[Customer & Admin] Tạo đơn đặt hàng mới' })
     @ApiResponse({ status: 201, description: 'Đơn hàng được tạo thành công' })
-    createOrder(@Body() createOrderDto: CreateOrderDto) {
-        return this.ordersService.createOrder(createOrderDto);
+    createOrder(@Req() req: RequestWithUser, @Body() createOrderDto: CreateOrderDto) {
+        // Tự động gán userId từ token nếu là customer hoặc nếu không truyền
+        const userId = (req.user.role === 'admin' && createOrderDto.userId)
+            ? createOrderDto.userId
+            : req.user.id;
+        return this.ordersService.createOrder(Object.assign({}, createOrderDto, { userId }));
     }
 
     @Get()
@@ -41,8 +45,12 @@ export class OrdersController {
     @ApiBearerAuth()
     @ApiOperation({ summary: '[Đăng nhập] Xem chi tiết đơn hàng theo ID' })
     @ApiParam({ name: 'id', description: 'ID đơn hàng' })
-    findOrderById(@Param('id', ParseIntPipe) id: number) {
-        return this.ordersService.findOrderById(id);
+    async findOrderById(@Req() req: RequestWithUser, @Param('id', ParseIntPipe) id: number) {
+        const order = await this.ordersService.findOrderById(id);
+        if (req.user.role !== 'admin' && order.user?.id !== req.user.id) {
+            throw new ForbiddenException('Bạn không có quyền xem đơn hàng này.');
+        }
+        return order;
     }
 
     @Patch(':id/status')
