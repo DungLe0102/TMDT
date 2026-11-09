@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, OneToMany, CreateDateColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, OneToMany, CreateDateColumn, Index } from 'typeorm';
 import { User } from '../users/user.entity.js';
 import { Product } from '../products/product.entity.js';
 
@@ -7,9 +7,11 @@ export class Order {
     @PrimaryGeneratedColumn()
     id: number;
 
+    @Index()
     @ManyToOne(() => User, (user: User) => user.orders)
     user: User;
 
+    @Index()
     @Column({ default: 'placed' })
     status: string; // 'placed', 'paid', 'shipped', 'delivered', 'cancelled', 'returned'
 
@@ -22,12 +24,15 @@ export class Order {
     @Column({ nullable: true })
     qrCodeUrl: string;
 
+    @Index()
     @Column({ nullable: true })
     paymentTransactionId: string;
 
+    @Index()
     @Column({ type: 'timestamp', nullable: true })
     paidAt: Date;
 
+    @Index()
     @CreateDateColumn()
     createdAt: Date;
 

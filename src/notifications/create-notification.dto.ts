@@ -18,3 +18,4 @@ export class CreateNotificationDto {
   @IsString({ message: 'Nội dung thông báo phải là chuỗi ký tự' })
   message: string;
 }
+

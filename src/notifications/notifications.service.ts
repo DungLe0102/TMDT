@@ -95,6 +95,26 @@ export class NotificationsService {
     await this.sendMail(email, subject, html);
   }
 
+  async sendPasswordResetEmail(email: string, resetToken: string): Promise<void> {
+    const subject = 'Yêu cầu khôi phục mật khẩu tài khoản';
+    const html = `
+      <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 8px; padding: 20px;">
+        <h2 style="color: #d32f2f; text-align: center;">🔐 Khôi phục mật khẩu</h2>
+        <p>Xin chào,</p>
+        <p>Chúng tôi nhận được yêu cầu đặt lại mật khẩu cho tài khoản <strong>${email}</strong>.</p>
+        <p>Mã xác thực khôi phục mật khẩu (Token) của bạn là:</p>
+        <div style="background-color: #fce4ec; padding: 15px; border-radius: 6px; margin: 15px 0; text-align: center;">
+          <h2 style="color: #c2185b; letter-spacing: 4px; margin: 0; font-family: monospace;">${resetToken}</h2>
+        </div>
+        <p><em>Lưu ý: Mã này chỉ có hiệu lực trong vòng <strong>15 phút</strong>. Nếu không phải bạn yêu cầu, vui lòng bỏ qua thư này.</em></p>
+        <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
+        <p style="font-size: 12px; color: #888; text-align: center;">Hệ thống E-Commerce Store - Email tự động.</p>
+      </div>
+    `;
+
+    await this.sendMail(email, subject, html);
+  }
+
   // --- In-App Notifications ---
 
   async createInAppNotification(userId: number, title: string, message: string): Promise<Notification> {

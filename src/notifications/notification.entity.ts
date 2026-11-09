@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, Index } from 'typeorm';
 import { User } from '../users/user.entity.js';
 
 @Entity()
@@ -12,12 +12,15 @@ export class Notification {
   @Column('text')
   message: string;
 
+  @Index()
   @Column({ default: false })
   read: boolean;
 
+  @Index()
   @CreateDateColumn()
   createdAt: Date;
 
+  @Index()
   @ManyToOne(() => User, (user: User) => user.notifications, { onDelete: 'CASCADE' })
   user: User;
 }

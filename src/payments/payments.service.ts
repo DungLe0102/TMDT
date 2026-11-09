@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { Order } from '../orders/order.entity.js';
 import { VietQRWebhookDto } from './vietqr-webhook.dto.js';
 import type { User } from '../users/user.entity.js';
+import { NotificationsService } from '../notifications/notifications.service.js';
 
 @Injectable()
 export class PaymentsService {
@@ -14,6 +15,7 @@ export class PaymentsService {
         @InjectRepository(Order)
         private ordersRepository: Repository<Order>,
         private configService: ConfigService,
+        private notificationsService: NotificationsService,
     ) { }
 
     /**
@@ -103,7 +105,10 @@ export class PaymentsService {
         }
 
         const orderId = parseInt(match[1], 10);
-        const order = await this.ordersRepository.findOne({ where: { id: orderId } });
+        const order = await this.ordersRepository.findOne({
+            where: { id: orderId },
+            relations: { user: true },
+        });
         if (!order) {
             this.logger.warn(`Đơn hàng #${orderId} không tồn tại.`);
             return {
@@ -137,6 +142,22 @@ export class PaymentsService {
         order.paymentTransactionId = dto.transactionId;
         order.paidAt = new Date();
         await this.ordersRepository.save(order);
+
+        // Gửi thông báo thanh toán thành công qua Email và In-app
+        if (order.user?.email) {
+            this.notificationsService.sendOrderStatusUpdateEmail(
+                order.user.email,
+                order.id,
+                'paid (Đã thanh toán)',
+            ).catch(() => {});
+        }
+        if (order.user?.id) {
+            this.notificationsService.createInAppNotification(
+                order.user.id,
+                'Thanh toán thành công',
+                `Đơn hàng #${order.id} trị giá ${Number(order.total).toLocaleString('vi-VN')} VND đã được thanh toán thành công qua VietQR.`,
+            ).catch(() => {});
+        }
 
         this.logger.log(
             `Đơn hàng #${orderId} thanh toán thành công! Giao dịch: ${dto.transactionId}, Số tiền: ${dto.amount}`,

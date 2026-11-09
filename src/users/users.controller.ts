@@ -1,7 +1,7 @@
 import { Controller, Post, Body, Get, Patch, Delete, Param, ParseIntPipe, UseGuards, Req } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 import { UsersService } from './users.service.js';
-import { CreateUserDto, UpdateUserDto, LoginDto } from './dto/index.js';
+import { CreateUserDto, UpdateUserDto, LoginDto, ForgotPasswordDto, ResetPasswordDto } from './dto/index.js';
 import { JwtAuthGuard } from '../auth/jwt/jwt.guard.js';
 import { RolesGuard } from '../auth/roles.guard.js';
 import { Roles } from '../auth/roles.decorator.js';
@@ -36,6 +36,21 @@ export class UsersController {
     @ApiResponse({ status: 401, description: 'Email hoặc mật khẩu không chính xác.' })
     async login(@Body() body: LoginDto) {
         return this.authService.login(body.email, body.password);
+    }
+
+    @Post('forgot-password')
+    @ApiOperation({ summary: 'Gửi yêu cầu khôi phục mật khẩu qua Email' })
+    @ApiResponse({ status: 200, description: 'Đã gửi mã khôi phục mật khẩu nếu email tồn tại.' })
+    async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
+        return this.usersService.forgotPassword(forgotPasswordDto);
+    }
+
+    @Post('reset-password')
+    @ApiOperation({ summary: 'Đặt lại mật khẩu mới bằng Token khôi phục' })
+    @ApiResponse({ status: 200, description: 'Đổi mật khẩu thành công.' })
+    @ApiResponse({ status: 400, description: 'Token không hợp lệ hoặc đã hết hạn.' })
+    async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
+        return this.usersService.resetPassword(resetPasswordDto);
     }
 
     @UseGuards(JwtAuthGuard)

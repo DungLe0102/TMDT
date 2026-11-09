@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany, Index } from 'typeorm';
 import type { Order } from '../orders/order.entity.js';
 import type { Cart } from '../cart/cart.entity.js';
 import type { Review } from '../reviews/review.entity.js';
@@ -10,17 +10,26 @@ export class User {
     @PrimaryGeneratedColumn()
     id: number;
 
+    @Index()
     @Column({ unique: true })
     email: string;
 
     @Column()
     password: string;
 
+    @Index()
     @Column()
     role: string; // 'admin' or 'customer'
 
     @Column({ default: '' })
     profile: string;
+
+    @Index()
+    @Column({ nullable: true })
+    resetPasswordToken: string;
+
+    @Column({ type: 'timestamp', nullable: true })
+    resetPasswordExpires: Date;
 
     @OneToMany('Order', (order: Order) => order.user)
     orders: Order[];

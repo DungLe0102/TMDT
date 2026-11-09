@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, OneToMany } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, OneToMany, Index } from 'typeorm';
 import { User } from '../users/user.entity.js';
 import { Product } from '../products/product.entity.js';
 
@@ -7,6 +7,7 @@ export class Cart {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Index()
   @ManyToOne(() => User, (user: User) => user.carts)
   user: User;
 
@@ -19,9 +20,11 @@ export class CartItem {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Index()
   @ManyToOne(() => Cart, (cart: Cart) => cart.items)
   cart: Cart;
 
+  @Index()
   @ManyToOne(() => Product, (product: Product) => product.id)
   product: Product;
 
