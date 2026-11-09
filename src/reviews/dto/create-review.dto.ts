@@ -22,3 +22,4 @@ export class CreateReviewDto {
   @IsString({ message: 'Nội dung bình luận phải là chuỗi ký tự' })
   comment: string;
 }
+

@@ -16,3 +16,4 @@ export class Wishlist {
   @CreateDateColumn()
   createdAt: Date;
 }
+

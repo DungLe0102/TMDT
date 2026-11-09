@@ -22,3 +22,4 @@ export class Review {
   @ManyToOne(() => Product, (product: Product) => product.reviews, { onDelete: 'CASCADE' })
   product: Product;
 }
+

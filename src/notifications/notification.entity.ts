@@ -21,3 +21,4 @@ export class Notification {
   @ManyToOne(() => User, (user: User) => user.notifications, { onDelete: 'CASCADE' })
   user: User;
 }
+

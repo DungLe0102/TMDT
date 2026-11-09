@@ -36,3 +36,4 @@ export class FilterProductDto {
   @Min(1)
   minRating?: number;
 }
+

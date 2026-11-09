@@ -17,3 +17,4 @@ import { ProductsModule } from '../products/products.module.js';
   exports: [WishlistService],
 })
 export class WishlistModule {}
+

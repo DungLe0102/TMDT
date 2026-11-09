@@ -55,3 +55,4 @@ export class WishlistController {
     return this.wishlistService.viewWishlist(userId);
   }
 }
+
