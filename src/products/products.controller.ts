@@ -1,7 +1,7 @@
-import { Controller, Get, Post, Body, Param, Patch, Delete, ParseIntPipe, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Patch, Delete, ParseIntPipe, UseGuards, Query } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBearerAuth } from '@nestjs/swagger';
 import { ProductsService } from './products.service.js';
-import { CreateProductDto, UpdateProductDto, CreateCategoryDto, UpdateCategoryDto } from './dto/index.js';
+import { CreateProductDto, UpdateProductDto, CreateCategoryDto, UpdateCategoryDto, FilterProductDto } from './dto/index.js';
 import { JwtAuthGuard } from '../auth/jwt/jwt.guard.js';
 import { RolesGuard } from '../auth/roles.guard.js';
 import { Roles } from '../auth/roles.decorator.js';
@@ -10,6 +10,18 @@ import { Roles } from '../auth/roles.decorator.js';
 @Controller('products')
 export class ProductsController {
     constructor(private readonly productsService: ProductsService) { }
+
+    @Get('search')
+    @ApiOperation({ summary: '[Mọi người] Tìm kiếm sản phẩm theo tên hoặc mô tả' })
+    searchProducts(@Query('query') query: string) {
+        return this.productsService.searchProducts(query || '');
+    }
+
+    @Get('filter')
+    @ApiOperation({ summary: '[Mọi người] Lọc sản phẩm theo danh mục, khoảng giá, rating' })
+    filterProducts(@Query() filterDto: FilterProductDto) {
+        return this.productsService.filterProducts(filterDto);
+    }
 
     @Get()
     @ApiOperation({ summary: '[Mọi người] Lấy danh sách tất cả sản phẩm' })

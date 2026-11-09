@@ -5,6 +5,7 @@ import { Order, OrderItem } from './order.entity.js';
 import { CreateOrderDto, UpdateOrderStatusDto } from './dto/index.js';
 import { UsersService } from '../users/users.service.js';
 import { ProductsService } from '../products/products.service.js';
+import { NotificationsService } from '../notifications/notifications.service.js';
 
 @Injectable()
 export class OrdersService {
@@ -15,6 +16,7 @@ export class OrdersService {
         private orderItemsRepository: Repository<OrderItem>,
         private usersService: UsersService,
         private productsService: ProductsService,
+        private notificationsService: NotificationsService,
     ) { }
 
     async createOrder(createOrderDto: CreateOrderDto): Promise<Order> {
@@ -64,7 +66,24 @@ export class OrdersService {
             items: orderItems,
         });
 
-        return this.ordersRepository.save(order);
+        const savedOrder = await this.ordersRepository.save(order);
+
+        // Gửi email xác nhận đơn hàng và tạo thông báo in-app
+        if (user.email) {
+            this.notificationsService.sendOrderConfirmationEmail(
+                user.email,
+                savedOrder.id,
+                savedOrder.total,
+                savedOrder.items.length,
+            ).catch(() => {});
+        }
+        this.notificationsService.createInAppNotification(
+            user.id,
+            'Đặt hàng thành công',
+            `Đơn hàng #${savedOrder.id} với tổng số tiền ${Number(savedOrder.total).toLocaleString('vi-VN')} VND đã được đặt thành công.`,
+        ).catch(() => {});
+
+        return savedOrder;
     }
 
     async findAllOrders(): Promise<Order[]> {
@@ -97,7 +116,25 @@ export class OrdersService {
     async updateOrderStatus(id: number, updateOrderStatusDto: UpdateOrderStatusDto): Promise<Order> {
         const order = await this.findOrderById(id);
         order.status = updateOrderStatusDto.status;
-        return this.ordersRepository.save(order);
+        const savedOrder = await this.ordersRepository.save(order);
+
+        // Gửi email cập nhật trạng thái đơn hàng và tạo thông báo in-app
+        if (order.user?.email) {
+            this.notificationsService.sendOrderStatusUpdateEmail(
+                order.user.email,
+                savedOrder.id,
+                savedOrder.status,
+            ).catch(() => {});
+        }
+        if (order.user?.id) {
+            this.notificationsService.createInAppNotification(
+                order.user.id,
+                'Cập nhật trạng thái đơn hàng',
+                `Đơn hàng #${savedOrder.id} của bạn đã chuyển sang trạng thái "${savedOrder.status}".`,
+            ).catch(() => {});
+        }
+
+        return savedOrder;
     }
 
     async removeOrder(id: number): Promise<void> {

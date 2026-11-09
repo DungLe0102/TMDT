@@ -1,8 +1,10 @@
-import { Controller, Post, Body, Get, Patch, Delete, UseGuards, Req } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
+import { Controller, Post, Body, Get, Patch, Delete, Param, ParseIntPipe, UseGuards, Req } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 import { UsersService } from './users.service.js';
 import { CreateUserDto, UpdateUserDto, LoginDto } from './dto/index.js';
 import { JwtAuthGuard } from '../auth/jwt/jwt.guard.js';
+import { RolesGuard } from '../auth/roles.guard.js';
+import { Roles } from '../auth/roles.decorator.js';
 import type { Request } from 'express';
 import { AuthService } from '../auth/auth.service.js';
 import type { User } from './user.entity.js';
@@ -68,5 +70,37 @@ export class UsersController {
         const user = req.user;
         await this.usersService.remove(user.id);
         return { message: 'Xoá tài khoản thành công' };
+    }
+
+    // --- Admin User Management Endpoints ---
+
+    @Get()
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles('admin')
+    @ApiBearerAuth()
+    @ApiOperation({ summary: '[Admin] Lấy danh sách toàn bộ người dùng' })
+    async findAll() {
+        return this.usersService.findAll();
+    }
+
+    @Get(':id')
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles('admin')
+    @ApiBearerAuth()
+    @ApiOperation({ summary: '[Admin] Xem thông tin người dùng theo ID' })
+    @ApiParam({ name: 'id', description: 'ID người dùng' })
+    async findOne(@Param('id', ParseIntPipe) id: number) {
+        return this.usersService.findOneById(id);
+    }
+
+    @Delete(':id')
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles('admin')
+    @ApiBearerAuth()
+    @ApiOperation({ summary: '[Admin] Xóa người dùng theo ID' })
+    @ApiParam({ name: 'id', description: 'ID người dùng cần xóa' })
+    async remove(@Param('id', ParseIntPipe) id: number) {
+        await this.usersService.remove(id);
+        return { message: `Đã xóa người dùng #${id} thành công` };
     }
 }

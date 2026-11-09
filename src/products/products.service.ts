@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Product } from './product.entity.js';
 import { Category } from './category.entity.js';
-import { CreateProductDto, UpdateProductDto, CreateCategoryDto, UpdateCategoryDto } from './dto/index.js';
+import { CreateProductDto, UpdateProductDto, CreateCategoryDto, UpdateCategoryDto, FilterProductDto } from './dto/index.js';
 
 @Injectable()
 export class ProductsService {
@@ -22,6 +22,45 @@ export class ProductsService {
         }
         const product = this.productsRepository.create({ ...rest, category });
         return this.productsRepository.save(product);
+    }
+
+    async searchProducts(query: string): Promise<Product[]> {
+        return this.productsRepository.createQueryBuilder('product')
+            .leftJoinAndSelect('product.category', 'category')
+            .where('product.name ILIKE :query', { query: `%${query}%` })
+            .orWhere('product.description ILIKE :query', { query: `%${query}%` })
+            .getMany();
+    }
+
+    async filterProducts(filterDto: FilterProductDto): Promise<Product[]> {
+        const { query, categoryId, minPrice, maxPrice, minRating } = filterDto;
+        let qb = this.productsRepository.createQueryBuilder('product')
+            .leftJoinAndSelect('product.category', 'category');
+
+        if (query) {
+            qb = qb.andWhere('(product.name ILIKE :query OR product.description ILIKE :query)', { query: `%${query}%` });
+        }
+
+        if (categoryId) {
+            qb = qb.andWhere('category.id = :categoryId', { categoryId });
+        }
+
+        if (minPrice !== undefined) {
+            qb = qb.andWhere('product.price >= :minPrice', { minPrice });
+        }
+
+        if (maxPrice !== undefined) {
+            qb = qb.andWhere('product.price <= :maxPrice', { maxPrice });
+        }
+
+        if (minRating !== undefined) {
+            qb = qb.leftJoin('product.reviews', 'review')
+                .groupBy('product.id')
+                .addGroupBy('category.id')
+                .having('AVG(review.rating) >= :minRating', { minRating });
+        }
+
+        return qb.getMany();
     }
 
     async findAllProducts(): Promise<Product[]> {

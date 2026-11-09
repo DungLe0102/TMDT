@@ -5,12 +5,14 @@ import { OrdersController } from './orders.controller.js';
 import { Order, OrderItem } from './order.entity.js';
 import { UsersModule } from '../users/users.module.js';
 import { ProductsModule } from '../products/products.module.js';
+import { NotificationsModule } from '../notifications/notifications.module.js';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Order, OrderItem]),
     UsersModule,
     ProductsModule,
+    NotificationsModule,
   ],
   providers: [OrdersService],
   controllers: [OrdersController],
