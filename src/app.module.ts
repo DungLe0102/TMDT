@@ -15,6 +15,7 @@ import { ReviewsModule } from './reviews/reviews.module.js';
 import { WishlistModule } from './wishlist/wishlist.module.js';
 import { NotificationsModule } from './notifications/notifications.module.js';
 import { ReportsModule } from './reports/reports.module.js';
+import { RefundsModule } from './refunds/refunds.module.js';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
@@ -49,6 +50,7 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     WishlistModule,
     NotificationsModule,
     ReportsModule,
+    RefundsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
